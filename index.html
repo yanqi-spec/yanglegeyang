@@ -1,0 +1,636 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>羊了个羊 · 超级地狱</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      color: #333;
+    }
+    h1 {
+      margin: 20px 0;
+      font-size: 32px;
+      color: #d32f2f;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+    }
+    .stats {
+      display: flex;
+      gap: 18px;
+      margin: 15px 0;
+      font-size: 18px;
+      font-weight: bold;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .tray {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin: 20px 0;
+      width: 95%;
+      max-width: 700px;
+    }
+    .tray-slot {
+      width: 80px;
+      height: 80px;
+      border: 3px dashed #aaa;
+      border-radius: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: white;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .tray-slot.filled {
+      border-style: solid;
+      border-color: #4caf50;
+    }
+    .tray-slot img {
+      width: 64px;
+      height: 64px;
+      object-fit: contain;
+    }
+
+    .game-area {
+      position: relative;
+      width: 95%;
+      max-width: 700px;
+      height: 600px;
+      background: #fff9c4;
+      border-radius: 16px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+      overflow: hidden;
+      perspective: 1000px;
+    }
+
+    .block {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 12px;
+      background: white;
+      box-shadow: 3px 3px 8px rgba(0,0,0,0.25);
+      cursor: pointer;
+      transition: transform 0.2s, opacity 0.2s;
+      z-index: 1;
+    }
+    .block:hover {
+      transform: translateY(-6px) scale(1.08);
+      z-index: 10 !important;
+    }
+    .block.removed {
+      opacity: 0.3;
+      pointer-events: none;
+    }
+    .block.is-covered-hint {
+      border: 2px solid red;
+      box-shadow: 0 0 10px red;
+    }
+    .block img {
+      width: 64px;
+      height: 64px;
+      object-fit: contain;
+    }
+
+    .controls {
+      margin-top: 25px;
+    }
+    button {
+      padding: 12px 30px;
+      font-size: 20px;
+      background: #ff6f00;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      margin: 0 12px;
+      transition: background 0.3s;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+    }
+    button:hover {
+      background: #e65100;
+      transform: scale(1.05);
+    }
+
+    .message {
+      margin-top: 20px;
+      font-size: 22px;
+      font-weight: bold;
+      height: 32px;
+      color: #d32f2f;
+      text-align: center;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.4s, visibility 0.4s;
+    }
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .modal {
+      background: white;
+      width: 90%;
+      max-width: 500px;
+      padding: 30px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      position: relative;
+      transform: scale(0.9);
+      animation: popIn 0.4s forwards;
+    }
+    @keyframes popIn {
+      to { transform: scale(1); }
+    }
+    .modal h2 {
+      color: #ff6f00;
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+    .danmaku-container {
+      height: 60px;
+      overflow: hidden;
+      position: relative;
+      margin: 15px 0;
+      background: #fff8e1;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+    }
+    .danmaku-text {
+      position: absolute;
+      white-space: nowrap;
+      font-size: 20px;
+      color: #d32f2f;
+      animation: scrollDanmaku 8s linear infinite;
+    }
+    @keyframes scrollDanmaku {
+      from { transform: translateX(100%); }
+      to { transform: translateX(-100%); }
+    }
+    .input-group {
+      margin: 20px 0;
+    }
+    .input-group input {
+      width: 70%;
+      padding: 12px;
+      font-size: 18px;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      outline: none;
+      text-align: center;
+    }
+    .input-group input:focus {
+      border-color: #ff6f00;
+    }
+    .modal button {
+      margin-top: 10px;
+      padding: 10px 25px;
+      font-size: 18px;
+    }
+    .error {
+      color: red;
+      font-size: 16px;
+      margin-top: 8px;
+      min-height: 20px;
+    }
+
+    .record {
+      font-size: 16px;
+      color: #5d4037;
+      background: rgba(255,255,255,0.7);
+      padding: 6px 12px;
+      border-radius: 10px;
+      margin-top: 5px;
+    }
+
+    .god-mode-badge {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: gold;
+      color: #333;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-weight: bold;
+      z-index: 999;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="god-mode-badge" id="godModeBadge">👑 大佬模式 ON</div>
+
+  <h1>🐑 羊了个羊 · 超级地狱</h1>
+  
+  <div class="stats">
+    <div>关卡：<span id="level">1</span></div>
+    <div>得分：<span id="score">0</span></div>
+    <div>剩余：<span id="remaining">0</span></div>
+    <div class="record">最高分：<span id="highScore">0</span> | 最高关：<span id="highLevel">1</span></div>
+  </div>
+
+  <div class="tray" id="tray">
+    <div class="tray-slot"></div>
+    <div class="tray-slot"></div>
+    <div class="tray-slot"></div>
+    <div class="tray-slot"></div>
+    <div class="tray-slot"></div>
+    <div class="tray-slot"></div>
+    <div class="tray-slot"></div>
+  </div>
+
+  <div class="game-area" id="gameArea"></div>
+
+  <div class="message" id="message"></div>
+
+  <div class="controls">
+    <button onclick="newGame(currentLevel)">新游戏</button>
+    <button onclick="requestUndo()">撤回</button>
+  </div>
+
+  <!-- 第一关通关弹窗 -->
+  <div class="modal-overlay" id="winModal">
+    <div class="modal">
+      <h2>🎉 第一关通关！</h2>
+      <div class="danmaku-container">
+        <div class="danmaku-text">太棒啦！来试试第二关怎么样吧~~祝你开心 🎉</div>
+      </div>
+      <div class="input-group">
+        <input type="text" id="passInput" placeholder="请输入：加油" maxlength="10" />
+        <div class="error" id="errorMsg"></div>
+      </div>
+      <button onclick="tryNextLevel()">确认进入第二关</button>
+    </div>
+  </div>
+
+  <!-- 撤回请求弹窗 -->
+  <div class="modal-overlay" id="undoModal">
+    <div class="modal">
+      <h2>🥺 你求求我</h2>
+      <div id="undoPrompt">再让你撤回一次...可以吗？</div>
+      <div class="input-group">
+        <input type="text" id="undoInput" placeholder="请输入提示内容" maxlength="12" />
+        <div class="error" id="undoError"></div>
+      </div>
+      <button onclick="confirmUndo()">求你了！</button>
+    </div>
+  </div>
+
+  <script>
+    const imageUrls = [
+      'https://pic1.imgdb.cn/item/6938d02af9354404e342de8b.jpg',
+      'https://pic1.imgdb.cn/item/6938d02af9354404e342de88.webp',
+      'https://pic1.imgdb.cn/item/6938d02af9354404e342de8a.jpg',
+      'https://pic1.imgdb.cn/item/6938d02af9354404e342de8c.jpg',
+      'https://pic1.imgdb.cn/item/6938d02af9354404e342de89.webp',
+      'https://pic1.imgdb.cn/item/6937f2cb00233646958d8a46.jpg',
+      'https://pic1.imgdb.cn/item/6937f2c600233646958d8a44.webp',
+      'https://pic1.imgdb.cn/item/6937f2c300233646958d8a41.webp',
+      'https://pic1.imgdb.cn/item/6937f2c000233646958d8a40.jpg',
+      'https://pic1.imgdb.cn/item/6937f2bc00233646958d8a3a.png'
+    ];
+
+    let currentLevel = 1;
+    const traySize = 7;
+    let blocks = [];
+    let tray = [];
+    let history = [];
+    let score = 0;
+    let totalBlocks = 0;
+    let freeUndoUsed = false;
+    let godMode = false;
+
+    // 求饶语池
+    const mercyPhrases = [
+      { key: '求求你了', display: '求求你了' },
+      { key: '我错了', display: '我错了' },
+      { key: '放过我吧', display: '放过我吧' },
+      { key: '羊羊大人', display: '羊羊大人' },
+      { key: '给次机会', display: '给次机会' }
+    ];
+    let currentMercy = null;
+
+    // 本地记录
+    let highScore = localStorage.getItem('sheepHighScore') || 0;
+    let highLevel = localStorage.getItem('sheepHighLevel') || 1;
+    document.getElementById('highScore').textContent = highScore;
+    document.getElementById('highLevel').textContent = highLevel;
+
+    function saveRecord() {
+      if (score > highScore) {
+        highScore = score;
+        localStorage.setItem('sheepHighScore', highScore);
+        document.getElementById('highScore').textContent = highScore;
+      }
+      if (currentLevel > highLevel) {
+        highLevel = currentLevel;
+        localStorage.setItem('sheepHighLevel', highLevel);
+        document.getElementById('highLevel').textContent = highLevel;
+      }
+    }
+
+    function newGame(level) {
+      currentLevel = level;
+      document.getElementById('level').textContent = level;
+      document.getElementById('message').textContent = '';
+      document.getElementById('winModal').classList.remove('active');
+      document.getElementById('undoModal').classList.remove('active');
+      const gameArea = document.getElementById('gameArea');
+      gameArea.innerHTML = '';
+      tray = [];
+      history = [];
+      score = 0;
+      freeUndoUsed = false;
+      updateUI();
+
+      let selectedImages, layers, allItems;
+
+      if (level === 1) {
+        selectedImages = [...imageUrls].sort(() => 0.5 - Math.random()).slice(0, 6);
+        allItems = [];
+        selectedImages.forEach(img => {
+          for (let i = 0; i < 9; i++) allItems.push(img);
+        });
+        allItems = allItems.sort(() => 0.5 - Math.random());
+        totalBlocks = allItems.length;
+        layers = [{ count: 15, offset: 0 }, { count: 15, offset: 40 }, { count: 24, offset: 80 }];
+      } else if (level === 2) {
+        selectedImages = [...imageUrls].sort(() => 0.5 - Math.random()).slice(0, 7);
+        allItems = [];
+        selectedImages.forEach(img => {
+          for (let i = 0; i < 12; i++) allItems.push(img);
+        });
+        allItems = allItems.sort(() => 0.5 - Math.random());
+        totalBlocks = allItems.length;
+        layers = [
+          { count: 8, offset: 0 },
+          { count: 12, offset: 25 },
+          { count: 14, offset: 50 },
+          { count: 16, offset: 75 },
+          { count: 18, offset: 100 },
+          { count: 20, offset: 125 }
+        ];
+      }
+
+      blocks = [];
+      let index = 0;
+      layers.forEach((layer, layerIndex) => {
+        const cols = [3, 4, 4, 5, 5, 5][layerIndex] || 5;
+        const rows = Math.ceil(layer.count / cols);
+        for (let i = 0; i < layer.count && index < allItems.length; i++) {
+          const col = i % cols;
+          const row = Math.floor(i / cols);
+          const x = 70 + col * 80 + Math.random() * 12 - 6;
+          const y = 30 + row * 65 + layer.offset;
+          blocks.push({
+            id: index,
+            imageUrl: allItems[index],
+            x: x,
+            y: y,
+            layer: layer.offset,
+            removed: false,
+            coveredBy: []
+          });
+          index++;
+        }
+      });
+
+      blocks.forEach(b1 => {
+        blocks.forEach(b2 => {
+          if (b2.layer > b1.layer) {
+            const dx = Math.abs(b1.x - b2.x);
+            const dy = Math.abs(b1.y - b2.y);
+            if (dx < 85 && dy < 75) {
+              b1.coveredBy.push(b2.id);
+            }
+          }
+        });
+      });
+
+      renderBlocks();
+      document.getElementById('remaining').textContent = totalBlocks;
+    }
+
+    function isClickable(block) {
+      if (block.removed) return false;
+      return block.coveredBy.every(id => {
+        const b = blocks.find(x => x.id === id);
+        return b && b.removed;
+      });
+    }
+
+    function renderBlocks() {
+      const gameArea = document.getElementById('gameArea');
+      gameArea.innerHTML = '';
+      blocks.forEach(block => {
+        if (block.removed) return;
+        const div = document.createElement('div');
+        div.className = 'block';
+        if (isClickable(block)) {
+          div.style.zIndex = '5';
+          div.onclick = () => clickBlock(block.id);
+        } else {
+          div.style.opacity = '0.4';
+          div.style.cursor = 'default';
+        }
+        if (godMode && block.coveredBy.length > 0) {
+          div.classList.add('is-covered-hint');
+        }
+        const img = document.createElement('img');
+        img.src = block.imageUrl;
+        img.alt = "tile";
+        div.appendChild(img);
+        div.style.left = (block.x - 40) + 'px';
+        div.style.top = (block.y - 40) + 'px';
+        gameArea.appendChild(div);
+      });
+      renderTray();
+    }
+
+    function renderTray() {
+      const slots = document.querySelectorAll('.tray-slot');
+      slots.forEach((slot, i) => {
+        slot.innerHTML = '';
+        slot.className = 'tray-slot';
+        if (i < tray.length) {
+          const img = document.createElement('img');
+          img.src = tray[i];
+          slot.appendChild(img);
+          slot.classList.add('filled');
+        }
+      });
+    }
+
+    function clickBlock(id) {
+      const block = blocks.find(b => b.id === id);
+      if (!block || block.removed || !isClickable(block)) return;
+
+      history.push({ tray: [...tray], removed: block.id });
+
+      block.removed = true;
+      tray.push(block.imageUrl);
+      checkEliminate();
+      totalBlocks--;
+      document.getElementById('remaining').textContent = totalBlocks;
+
+      if (totalBlocks === 0) {
+        saveRecord();
+        if (currentLevel === 1) {
+          setTimeout(() => document.getElementById('winModal').classList.add('active'), 500);
+        } else {
+          let msg = '🏆 地狱通关！';
+          if (godMode) msg += ' 👑（大佬认证）';
+          document.getElementById('message').textContent = msg;
+        }
+      } else if (tray.length > traySize) {
+        document.getElementById('message').textContent = '❌ 槽位已满，挑战失败！';
+        saveRecord();
+      }
+
+      renderBlocks();
+    }
+
+    function checkEliminate() {
+      if (tray.length < 3) return;
+      const last = tray[tray.length - 1];
+      let count = 0;
+      for (let i = tray.length - 1; i >= 0; i--) {
+        if (tray[i] === last) count++;
+        if (count === 3) {
+          tray = tray.filter(item => item !== last);
+          score += 30;
+          updateUI();
+          return;
+        }
+      }
+    }
+
+    function updateUI() {
+      document.getElementById('score').textContent = score;
+    }
+
+    function requestUndo() {
+      if (godMode) {
+        performUndo();
+        return;
+      }
+      if (!freeUndoUsed) {
+        freeUndoUsed = true;
+        performUndo();
+      } else {
+        // 随机选择一个求饶语
+        currentMercy = mercyPhrases[Math.floor(Math.random() * mercyPhrases.length)];
+        document.getElementById('undoPrompt').textContent = `请输入：“${currentMercy.display}”`;
+        document.getElementById('undoInput').placeholder = `请输入：${currentMercy.display}`;
+        document.getElementById('undoInput').value = '';
+        document.getElementById('undoError').textContent = '';
+        document.getElementById('undoModal').classList.add('active');
+      }
+    }
+
+    function confirmUndo() {
+      const input = document.getElementById('undoInput').value.trim();
+      const errorMsg = document.getElementById('undoError');
+      if (input.toLowerCase().replace(/\s/g, '') === currentMercy.key.toLowerCase().replace(/\s/g, '')) {
+        document.getElementById('undoModal').classList.remove('active');
+        performUndo();
+      } else {
+        errorMsg.textContent = '说对了才行哦～';
+        setTimeout(() => errorMsg.textContent = '', 2000);
+      }
+    }
+
+    function performUndo() {
+      if (history.length === 0) return;
+      const last = history.pop();
+      tray = [...last.tray];
+      const block = blocks.find(b => b.id === last.removed);
+      if (block) block.removed = false;
+      totalBlocks++;
+      document.getElementById('remaining').textContent = totalBlocks;
+      document.getElementById('message').textContent = '';
+      renderBlocks();
+    }
+
+    function tryNextLevel() {
+      const input = document.getElementById('passInput').value.trim();
+      const errorMsg = document.getElementById('errorMsg');
+      if (input.toLowerCase() === '加油') {
+        document.getElementById('winModal').classList.remove('active');
+        newGame(2);
+      } else {
+        errorMsg.textContent = '请输入“加油”才能进入第二关哦～';
+        setTimeout(() => errorMsg.textContent = '', 2000);
+      }
+    }
+
+    // —————— 大佬模式：仅键盘触发 ——————
+    let sixCount = 0;
+    let lastSixTime = 0;
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '6') {
+        const now = Date.now();
+        if (now - lastSixTime > 3000) sixCount = 0;
+        sixCount++;
+        lastSixTime = now;
+        if (sixCount >= 6) {
+          godMode = !godMode;
+          document.getElementById('godModeBadge').style.display = godMode ? 'block' : 'none';
+          sixCount = 0;
+          if (godMode) {
+            alert('👑 大佬模式已开启！\n- 无限撤回\n- 覆盖关系可见\n- 通关自动认证');
+          } else {
+            alert('😐 大佬模式已关闭。');
+          }
+          renderBlocks();
+        }
+      }
+    });
+
+    // 回车提交
+    document.getElementById('passInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') tryNextLevel();
+    });
+    document.getElementById('undoInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') confirmUndo();
+    });
+
+    window.onload = () => newGame(1);
+  </script>
+
+</body>
+</html>
