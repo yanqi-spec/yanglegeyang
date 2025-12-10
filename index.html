@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>羊了个羊 · 超级地狱</title>
+  <title>羊了个羊 · 超级地狱 Pro</title>
   <style>
     * {
       margin: 0;
@@ -20,6 +20,7 @@
       align-items: center;
       padding: 20px;
       color: #333;
+      position: relative;
     }
     h1 {
       margin: 20px 0;
@@ -112,18 +113,21 @@
 
     .controls {
       margin-top: 25px;
+      display: flex;
+      gap: 15px;
     }
     button {
-      padding: 12px 30px;
-      font-size: 20px;
+      padding: 12px 20px;
+      font-size: 18px;
       background: #ff6f00;
       color: white;
       border: none;
       border-radius: 50px;
       cursor: pointer;
-      margin: 0 12px;
+      margin: 0 8px;
       transition: background 0.3s;
       box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+      white-space: nowrap;
     }
     button:hover {
       background: #e65100;
@@ -173,11 +177,6 @@
     @keyframes popIn {
       to { transform: scale(1); }
     }
-    .modal h2 {
-      color: #ff6f00;
-      font-size: 28px;
-      margin-bottom: 20px;
-    }
     .danmaku-container {
       height: 60px;
       overflow: hidden;
@@ -214,11 +213,6 @@
     .input-group input:focus {
       border-color: #ff6f00;
     }
-    .modal button {
-      margin-top: 10px;
-      padding: 10px 25px;
-      font-size: 18px;
-    }
     .error {
       color: red;
       font-size: 16px;
@@ -247,18 +241,67 @@
       z-index: 999;
       display: none;
     }
+
+    /* ✅ 修改：提示文字放在右侧中部，竖排 */
+    .hint-footer {
+      position: fixed;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.9);
+      color: #e91e63;
+      padding: 8px 16px;
+      border-radius: 12px;
+      font-weight: bold;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      letter-spacing: 2px;
+      z-index: 900;
+      animation: fadeInRight 0.6s ease-out;
+    }
+    @keyframes fadeInRight {
+      from {
+        opacity: 0;
+        transform: translateY(-50%) translateX(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0);
+      }
+    }
+
+    /* 排行榜样式 */
+    .leaderboard-list {
+      text-align: left;
+      margin: 20px 0;
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 0 10px;
+    }
+    .leaderboard-item {
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+      font-size: 16px;
+    }
+    .leaderboard-item strong {
+      color: #ff6f00;
+    }
   </style>
 </head>
 <body>
 
   <div class="god-mode-badge" id="godModeBadge">👑 大佬模式 ON</div>
+  <!-- ✅ 提示文字：右侧中部竖排 -->
+  <div class="hint-footer">滑到下面可以撤回哟</div>
 
-  <h1>🐑 羊了个羊 · 超级地狱</h1>
+  <h1>🐑 羊了个羊 · 超级地狱 Pro</h1>
   
   <div class="stats">
     <div>关卡：<span id="level">1</span></div>
     <div>得分：<span id="score">0</span></div>
     <div>剩余：<span id="remaining">0</span></div>
+    <div>撤回：<span id="undoCount">0</span> 次</div>
     <div class="record">最高分：<span id="highScore">0</span> | 最高关：<span id="highLevel">1</span></div>
   </div>
 
@@ -278,7 +321,7 @@
 
   <div class="controls">
     <button onclick="newGame(currentLevel)">新游戏</button>
-    <button onclick="requestUndo()">撤回</button>
+    <button onclick="requestUndo()">撤回（<span id="freeUndoHint">免费</span>）</button>
   </div>
 
   <!-- 第一关通关弹窗 -->
@@ -309,6 +352,25 @@
     </div>
   </div>
 
+  <!-- ✅ 新增：槽位已满失败弹窗 -->
+  <div class="modal-overlay" id="failModal">
+    <div class="modal">
+      <h2>❌ 槽位已满！</h2>
+      <p style="margin: 15px 0;">挑战失败，请撤回操作或重新开始。</p>
+      <button onclick="document.getElementById('failModal').classList.remove('active')">确定</button>
+    </div>
+  </div>
+
+  <!-- 排行榜弹窗 -->
+  <div class="modal-overlay" id="rankModal">
+    <div class="modal">
+      <h2>🏆 通关排行榜</h2>
+      <p>本次成绩：得分 <strong id="finalScore">0</strong>，撤回 <strong id="finalUndo">0</strong> 次</p>
+      <div class="leaderboard-list" id="leaderboardList"></div>
+      <button onclick="document.getElementById('rankModal').classList.remove('active')">关闭</button>
+    </div>
+  </div>
+
   <script>
     const imageUrls = [
       'https://pic1.imgdb.cn/item/6938d02af9354404e342de8b.jpg',
@@ -332,6 +394,8 @@
     let totalBlocks = 0;
     let freeUndoUsed = false;
     let godMode = false;
+    let undoCount = 0;
+    let startTime = Date.now();
 
     // 求饶语池
     const mercyPhrases = [
@@ -349,6 +413,9 @@
     document.getElementById('highScore').textContent = highScore;
     document.getElementById('highLevel').textContent = highLevel;
 
+    // 排行榜：[{ level, score, undoCount, timeSec }]
+    let leaderboard = JSON.parse(localStorage.getItem('sheepLeaderboard') || '[]');
+
     function saveRecord() {
       if (score > highScore) {
         highScore = score;
@@ -362,19 +429,51 @@
       }
     }
 
+    function addToLeaderboard(finalScore, undoCount) {
+      const timeSec = Math.floor((Date.now() - startTime) / 1000);
+      const record = {
+        level: currentLevel,
+        score: finalScore,
+        undoCount: undoCount,
+        timeSec: timeSec
+      };
+      leaderboard.unshift(record);
+      if (leaderboard.length > 5) leaderboard.pop();
+      localStorage.setItem('sheepLeaderboard', JSON.stringify(leaderboard));
+    }
+
+    function showLeaderboard(finalScore, undoCount) {
+      addToLeaderboard(finalScore, undoCount);
+      document.getElementById('finalScore').textContent = finalScore;
+      document.getElementById('finalUndo').textContent = undoCount;
+      const listEl = document.getElementById('leaderboardList');
+      listEl.innerHTML = '';
+      leaderboard.forEach((rec, i) => {
+        const item = document.createElement('div');
+        item.className = 'leaderboard-item';
+        item.textContent = `#${i+1} 关卡${rec.level} | 得分 ${rec.score} | 撤回 ${rec.undoCount} 次 | ${rec.timeSec}s`;
+        listEl.appendChild(item);
+      });
+      document.getElementById('rankModal').classList.add('active');
+    }
+
     function newGame(level) {
       currentLevel = level;
       document.getElementById('level').textContent = level;
       document.getElementById('message').textContent = '';
       document.getElementById('winModal').classList.remove('active');
       document.getElementById('undoModal').classList.remove('active');
+      document.getElementById('failModal').classList.remove('active'); // ✅ 关闭失败弹窗
+      document.getElementById('rankModal').classList.remove('active');
       const gameArea = document.getElementById('gameArea');
       gameArea.innerHTML = '';
       tray = [];
       history = [];
       score = 0;
+      undoCount = 0;
       freeUndoUsed = false;
       updateUI();
+      startTime = Date.now();
 
       let selectedImages, layers, allItems;
 
@@ -442,6 +541,8 @@
 
       renderBlocks();
       document.getElementById('remaining').textContent = totalBlocks;
+      document.getElementById('undoCount').textContent = undoCount;
+      document.getElementById('freeUndoHint').textContent = '免费';
     }
 
     function isClickable(block) {
@@ -455,20 +556,31 @@
     function renderBlocks() {
       const gameArea = document.getElementById('gameArea');
       gameArea.innerHTML = '';
+
+      const isFailed = tray.length > traySize;
+
       blocks.forEach(block => {
         if (block.removed) return;
+
         const div = document.createElement('div');
         div.className = 'block';
-        if (isClickable(block)) {
+
+        if (isFailed) {
+          div.style.opacity = '0.4';
+          div.style.cursor = 'default';
+          div.style.transform = 'none';
+        } else if (isClickable(block)) {
           div.style.zIndex = '5';
           div.onclick = () => clickBlock(block.id);
         } else {
           div.style.opacity = '0.4';
           div.style.cursor = 'default';
         }
-        if (godMode && block.coveredBy.length > 0) {
+
+        if (godMode && block.coveredBy.length > 0 && !isFailed) {
           div.classList.add('is-covered-hint');
         }
+
         const img = document.createElement('img');
         img.src = block.imageUrl;
         img.alt = "tile";
@@ -495,6 +607,11 @@
     }
 
     function clickBlock(id) {
+      // 🛑 槽位已满时禁止点击新方块
+      if (tray.length >= traySize) {
+        return;
+      }
+
       const block = blocks.find(b => b.id === id);
       if (!block || block.removed || !isClickable(block)) return;
 
@@ -506,7 +623,11 @@
       totalBlocks--;
       document.getElementById('remaining').textContent = totalBlocks;
 
-      if (totalBlocks === 0) {
+      // ✅ 槽位溢出 → 弹窗提示
+      if (tray.length > traySize) {
+        document.getElementById('failModal').classList.add('active');
+        saveRecord();
+      } else if (totalBlocks === 0) {
         saveRecord();
         if (currentLevel === 1) {
           setTimeout(() => document.getElementById('winModal').classList.add('active'), 500);
@@ -514,10 +635,8 @@
           let msg = '🏆 地狱通关！';
           if (godMode) msg += ' 👑（大佬认证）';
           document.getElementById('message').textContent = msg;
+          setTimeout(() => showLeaderboard(score, undoCount), 1000);
         }
-      } else if (tray.length > traySize) {
-        document.getElementById('message').textContent = '❌ 槽位已满，挑战失败！';
-        saveRecord();
       }
 
       renderBlocks();
@@ -542,16 +661,65 @@
       document.getElementById('score').textContent = score;
     }
 
+    function addDifficultyLayers() {
+      if (currentLevel !== 2) return;
+      const extraLayers = 2;
+      const extraBlocksPerLayer = 10;
+      let newBlocks = [];
+      const selectedImages = [...imageUrls].sort(() => 0.5 - Math.random()).slice(0, 5);
+      let baseOffset = Math.max(...blocks.map(b => b.layer)) + 30;
+      for (let l = 0; l < extraLayers; l++) {
+        for (let i = 0; i < extraBlocksPerLayer; i++) {
+          const x = 70 + (i % 5) * 80 + Math.random() * 12 - 6;
+          const y = 30 + Math.floor(i / 5) * 65 + baseOffset + l * 30;
+          const img = selectedImages[Math.floor(Math.random() * selectedImages.length)];
+          const newId = blocks.length + newBlocks.length;
+          newBlocks.push({
+            id: newId,
+            imageUrl: img,
+            x: x,
+            y: y,
+            layer: baseOffset + l * 30,
+            removed: false,
+            coveredBy: []
+          });
+        }
+      }
+      newBlocks.forEach(nb => {
+        blocks.forEach(b => {
+          if (b.layer < nb.layer) {
+            const dx = Math.abs(nb.x - b.x);
+            const dy = Math.abs(nb.y - b.y);
+            if (dx < 85 && dy < 75) {
+              b.coveredBy.push(nb.id);
+            }
+          }
+        });
+      });
+      blocks.push(...newBlocks);
+      totalBlocks += newBlocks.length;
+      document.getElementById('remaining').textContent = totalBlocks;
+      renderBlocks();
+      document.getElementById('message').textContent = `⚠️ 难度升级！新增 ${extraLayers} 层方块！`;
+      setTimeout(() => {
+        if (totalBlocks > 0) document.getElementById('message').textContent = '';
+      }, 3000);
+    }
+
     function requestUndo() {
+      if (history.length === 0) {
+        alert('没有可撤回的操作！');
+        return;
+      }
       if (godMode) {
         performUndo();
         return;
       }
       if (!freeUndoUsed) {
         freeUndoUsed = true;
+        document.getElementById('freeUndoHint').textContent = '需请求';
         performUndo();
       } else {
-        // 随机选择一个求饶语
         currentMercy = mercyPhrases[Math.floor(Math.random() * mercyPhrases.length)];
         document.getElementById('undoPrompt').textContent = `请输入：“${currentMercy.display}”`;
         document.getElementById('undoInput').placeholder = `请输入：${currentMercy.display}`;
@@ -575,13 +743,30 @@
 
     function performUndo() {
       if (history.length === 0) return;
+
+      score -= 30;
+      if (score < 0) score = 0;
+      undoCount++;
+      updateUI();
+      document.getElementById('undoCount').textContent = undoCount;
+
+      if (currentLevel === 2 && undoCount % 2 === 0) {
+        setTimeout(addDifficultyLayers, 500);
+      }
+
       const last = history.pop();
       tray = [...last.tray];
       const block = blocks.find(b => b.id === last.removed);
       if (block) block.removed = false;
       totalBlocks++;
       document.getElementById('remaining').textContent = totalBlocks;
-      document.getElementById('message').textContent = '';
+
+      // ✅ 撤回后若恢复合法状态，自动关闭失败弹窗
+      if (tray.length <= traySize) {
+        document.getElementById('failModal').classList.remove('active');
+        document.getElementById('message').textContent = '';
+      }
+
       renderBlocks();
     }
 
@@ -597,10 +782,9 @@
       }
     }
 
-    // —————— 大佬模式：仅键盘触发 ——————
+    // —————— 大佬模式：按 6 键 6 次 ——————
     let sixCount = 0;
     let lastSixTime = 0;
-
     document.addEventListener('keydown', (e) => {
       if (e.key === '6') {
         const now = Date.now();
