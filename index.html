@@ -37,7 +37,6 @@
       flex-wrap: wrap;
       justify-content: center;
     }
-
     .tray {
       display: flex;
       justify-content: center;
@@ -66,7 +65,6 @@
       height: 64px;
       object-fit: contain;
     }
-
     .game-area {
       position: relative;
       width: 95%;
@@ -78,7 +76,6 @@
       overflow: hidden;
       perspective: 1000px;
     }
-
     .block {
       position: absolute;
       width: 80px;
@@ -114,7 +111,6 @@
       height: 64px;
       object-fit: contain;
     }
-
     .block.eliminating {
       animation: eliminateEffect 0.6s forwards;
     }
@@ -131,7 +127,6 @@
       50% { transform: scale(1.5) rotate(15deg); opacity: 0.7; }
       100% { transform: scale(0); opacity: 0; }
     }
-
     .controls {
       margin-top: 25px;
       display: flex;
@@ -160,7 +155,6 @@
     #godEliminateBtn:hover {
       background: #b8860b;
     }
-
     .message {
       margin-top: 20px;
       font-size: 22px;
@@ -169,7 +163,6 @@
       color: #d32f2f;
       text-align: center;
     }
-
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -204,7 +197,6 @@
     @keyframes popIn {
       to { transform: scale(1); }
     }
-
     .danmaku-container {
       height: 60px;
       overflow: hidden;
@@ -226,7 +218,6 @@
       from { transform: translateX(100%); }
       to { transform: translateX(-100%); }
     }
-
     .input-group {
       margin: 20px 0;
     }
@@ -248,7 +239,6 @@
       margin-top: 8px;
       min-height: 20px;
     }
-
     .record {
       font-size: 16px;
       color: #5d4037;
@@ -257,7 +247,6 @@
       border-radius: 10px;
       margin-top: 5px;
     }
-
     .god-mode-badge {
       position: fixed;
       top: 10px;
@@ -274,7 +263,6 @@
       background: linear-gradient(45deg, #ffd700, #ffed4e);
       box-shadow: 0 0 15px #ffd700;
     }
-
     .hint-footer {
       position: fixed;
       right: 20px;
@@ -302,7 +290,6 @@
         transform: translateY(-50%) translateX(0);
       }
     }
-
     .history-panel {
       position: fixed;
       right: 20px;
@@ -329,7 +316,6 @@
       border-radius: 6px;
       font-size: 13px;
     }
-
     .music-player {
       position: fixed;
       bottom: 20px;
@@ -342,7 +328,6 @@
       overflow: hidden;
       box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
-
     .leaderboard-list {
       text-align: left;
       margin: 20px 0;
@@ -358,7 +343,6 @@
     .leaderboard-item strong {
       color: #ff6f00;
     }
-
     #secondWinModal .danmaku-text {
       color: #4caf50;
       font-size: 22px;
@@ -366,15 +350,12 @@
   </style>
 </head>
 <body>
-
   <div class="god-mode-badge" id="godModeBadge">👑 大佬模式 ON | ✨ 无敌消除</div>
   <div class="hint-footer">滑到下面可以撤回哟 | </div>
-
   <div class="history-panel" id="historyPanel">
     <h3>🎮 最近战绩（10次）</h3>
     <div id="historyContent">暂无记录</div>
   </div>
-
   <h1>🐑 羊了个羊 · 超级地狱 Pro</h1>
   
   <div class="stats">
@@ -384,7 +365,6 @@
     <div>撤回：<span id="undoCount">0</span> 次</div>
     <div class="record">最高分：<span id="highScore">0</span> | 最高关：<span id="highLevel">1</span></div>
   </div>
-
   <div class="tray" id="tray">
     <div class="tray-slot"></div>
     <div class="tray-slot"></div>
@@ -394,17 +374,13 @@
     <div class="tray-slot"></div>
     <div class="tray-slot"></div>
   </div>
-
   <div class="game-area" id="gameArea"></div>
-
   <div class="message" id="message"></div>
-
   <div class="controls">
     <button onclick="newGame(currentLevel)">新游戏</button>
     <button onclick="requestUndo()">撤回（<span id="freeUndoHint">免费</span>）</button>
     <button id="godEliminateBtn" onclick="toggleGodEliminateMode()" style="display: none;">✨ 无敌消除模式</button>
   </div>
-
   <div class="modal-overlay" id="winModal">
     <div class="modal">
       <h2>🎉 第一关通关！</h2>
@@ -418,7 +394,6 @@
       <button onclick="tryNextLevel()">确认进入第二关</button>
     </div>
   </div>
-
   <div class="modal-overlay" id="secondWinModal">
     <div class="modal">
       <h2>🏆 第二关通关！</h2>
@@ -432,7 +407,6 @@
       <button onclick="tryThirdLevel()">确认进入第三关</button>
     </div>
   </div>
-
   <div class="modal-overlay" id="undoModal">
     <div class="modal">
       <h2>🥺 你求求我</h2>
@@ -444,7 +418,6 @@
       <button onclick="confirmUndo()">求你了！</button>
     </div>
   </div>
-
   <div class="modal-overlay" id="fullTrayModal">
     <div class="modal">
       <h2>⚠️ 卡槽已满</h2>
@@ -452,7 +425,6 @@
       <button onclick="document.getElementById('fullTrayModal').classList.remove('active')">确认</button>
     </div>
   </div>
-
   <div class="modal-overlay" id="failModal">
     <div class="modal">
       <h2>❌ 槽位已满！</h2>
@@ -460,7 +432,6 @@
       <button onclick="document.getElementById('failModal').classList.remove('active')">确定</button>
     </div>
   </div>
-
   <div class="modal-overlay" id="rankModal">
     <div class="modal">
       <h2>🏆 通关排行榜</h2>
@@ -469,14 +440,12 @@
       <button onclick="document.getElementById('rankModal').classList.remove('active')">关闭</button>
     </div>
   </div>
-
   <iframe 
     class="music-player"
     src="//music.163.com/outchain/player?type=2&id=2600493765&auto=1&height=66"
     frameborder="0"
     allowfullscreen>
   </iframe>
-
   <script>
     const baseImageUrls = [
       'https://pic1.imgdb.cn/item/6938d02af9354404e342de8b.jpg',
@@ -490,26 +459,24 @@
       'https://pic1.imgdb.cn/item/6937f2c000233646958d8a40.jpg',
       'https://pic1.imgdb.cn/item/6937f2bc00233646958d8a3a.png'
     ];
-
+    // 替换后的第三关专属图片
     const thirdLevelImageUrls = [
-      'https://pic1.imgdb.cn/item/6939122b6166b8110132922b.jpg',
-      'https://pic1.imgdb.cn/item/6939122b6166b8110132922a.jpg',
-      'https://pic1.imgdb.cn/item/6939122b6166b81101329227.jpg',
-      'https://pic1.imgdb.cn/item/693912256166b81101329212.webp',
-      'https://pic1.imgdb.cn/item/693912256166b81101329213.webp',
-      'https://pic1.imgdb.cn/item/693912256166b81101329215.jpg',
-      'https://pic1.imgdb.cn/item/693912256166b81101329216.jpg',
-      'https://pic1.imgdb.cn/item/693912256166b81101329214.jpg',
-      'https://pic1.imgdb.cn/item/693918e46166b8110132a1c2.jpg',
-      'https://pic1.imgdb.cn/item/693918e46166b8110132a1c6.jpg',
-      'https://pic1.imgdb.cn/item/693918e46166b8110132a1c3.jpg',
-      'https://pic1.imgdb.cn/item/693918e46166b8110132a1c5.jpg',
-      'https://pic1.imgdb.cn/item/693918e46166b8110132a1c8.jpg',
-      'https://pic1.imgdb.cn/item/693918e46166b8110132a1c4.jpg',
-      'https://pic1.imgdb.cn/item/693918ff6166b8110132a212.jpg',
-      'https://pic1.imgdb.cn/item/693918fe6166b8110132a211.jpg'
+      'https://pic1.imgdb.cn/item/693a66060edaae20ec55fdaa.jpg',
+      'https://pic1.imgdb.cn/item/693a66060edaae20ec55fdaf.jpg',
+      'https://pic1.imgdb.cn/item/693a66060edaae20ec55fdac.jpg',
+      'https://pic1.imgdb.cn/item/693a66060edaae20ec55fdab.jpg',
+      'https://pic1.imgdb.cn/item/693a66060edaae20ec55fdae.jpg',
+      'https://pic1.imgdb.cn/item/693a66170edaae20ec55fe3f.jpg',
+      'https://pic1.imgdb.cn/item/693a66170edaae20ec55fe41.png',
+      'https://pic1.imgdb.cn/item/693a66170edaae20ec55fe40.jpg',
+      'https://pic1.imgdb.cn/item/693a66170edaae20ec55fe3c.jpg',
+      'https://pic1.imgdb.cn/item/693a66170edaae20ec55fe3d.jpg',
+      'https://pic1.imgdb.cn/item/693a66230edaae20ec55feaf.png',
+      'https://pic1.imgdb.cn/item/693a66220edaae20ec55feaa.jpg',
+      'https://pic1.imgdb.cn/item/693a66230edaae20ec55feae.jpg',
+      'https://pic1.imgdb.cn/item/693a66230edaae20ec55feb2.png',
+      'https://pic1.imgdb.cn/item/693a66230edaae20ec55feab.png'
     ];
-
     let currentLevel = 1;
     const traySize = 7;
     let blocks = [];
@@ -522,7 +489,6 @@
     let godEliminateMode = false;
     let undoCount = 0;
     let startTime = Date.now();
-
     const mercyPhrases = [
       { key: '求求你了', display: '求求你了' },
       { key: '我错了', display: '我错了' },
@@ -531,16 +497,13 @@
       { key: '给次机会', display: '给次机会' }
     ];
     let currentMercy = null;
-
     let highScore = parseInt(localStorage.getItem('sheepHighScore')) || 0;
     let highLevel = parseInt(localStorage.getItem('sheepHighLevel')) || 1;
     let leaderboard = JSON.parse(localStorage.getItem('sheepLeaderboard') || '[]');
     let recentGames = JSON.parse(localStorage.getItem('sheepRecentGames') || '[]');
-
     document.getElementById('highScore').textContent = highScore;
     document.getElementById('highLevel').textContent = highLevel;
     updateHistoryPanel();
-
     function saveRecord() {
       if (score > highScore) {
         highScore = score;
@@ -553,7 +516,6 @@
         document.getElementById('highLevel').textContent = highLevel;
       }
     }
-
     function addToLeaderboard(finalScore, undoCount) {
       const timeSec = Math.floor((Date.now() - startTime) / 1000);
       const record = { level: currentLevel, score: finalScore, undoCount, timeSec };
@@ -561,14 +523,12 @@
       if (leaderboard.length > 5) leaderboard.pop();
       localStorage.setItem('sheepLeaderboard', JSON.stringify(leaderboard));
     }
-
     function addRecentGame(finalScore, timeSec) {
       recentGames.unshift({ score: finalScore, timeSec });
       if (recentGames.length > 10) recentGames.pop();
       localStorage.setItem('sheepRecentGames', JSON.stringify(recentGames));
       updateHistoryPanel();
     }
-
     function updateHistoryPanel() {
       const content = document.getElementById('historyContent');
       if (recentGames.length === 0) {
@@ -581,7 +541,6 @@
       });
       content.innerHTML = html;
     }
-
     function showLeaderboard(finalScore, undoCount) {
       const timeSec = Math.floor((Date.now() - startTime) / 1000);
       addToLeaderboard(finalScore, undoCount);
@@ -598,7 +557,6 @@
       });
       document.getElementById('rankModal').classList.add('active');
     }
-
     function newGame(level) {
       currentLevel = level;
       document.getElementById('level').textContent = level;
@@ -616,9 +574,7 @@
       godEliminateMode = false;
       updateUI();
       startTime = Date.now();
-
       let selectedImages, layers, allItems;
-
       if (level === 1) {
         selectedImages = [...baseImageUrls].sort(() => 0.5 - Math.random()).slice(0, 6);
         allItems = [];
@@ -653,40 +609,49 @@
         });
         allItems = allItems.sort(() => 0.5 - Math.random());
         totalBlocks = allItems.length;
+        // 优化第三关层数和布局，确保平均平铺
         layers = [
-          { count: 15, offset: 0 },
-          { count: 20, offset: 20 },
-          { count: 25, offset: 40 },
-          { count: 30, offset: 60 },
-          { count: 35, offset: 80 },
-          { count: 40, offset: 100 },
-          { count: 45, offset: 120 },
-          { count: 50, offset: 140 },
-          { count: 55, offset: 160 },
-          { count: 60, offset: 180 },
-          { count: 65, offset: 200 },
-          { count: 70, offset: 220 }
+          { count: 12, offset: 0 },
+          { count: 15, offset: 25 },
+          { count: 18, offset: 50 },
+          { count: 21, offset: 75 },
+          { count: 24, offset: 100 },
+          { count: 27, offset: 125 },
+          { count: 30, offset: 150 },
+          { count: 33, offset: 175 },
+          { count: 36, offset: 200 }
         ];
       }
-
       blocks = [];
       let index = 0;
       layers.forEach((layer, layerIndex) => {
-        const cols = level === 3 ? 
-          [5, 6, 7, 8, 9, 10, 10, 11, 11, 12, 12, 13][layerIndex] || 13 : 
-          [3, 4, 4, 5, 5, 5, 6][layerIndex] || 6;
+        // 第三关优化列数计算，确保方块平均分布
+        let cols;
+        if (currentLevel === 3) {
+          // 根据游戏区域宽度动态计算列数，确保平铺不溢出
+          const gameAreaWidth = document.getElementById('gameArea').offsetWidth || 665; // 默认宽度（减去padding）
+          cols = Math.floor((gameAreaWidth - 80) / 85); // 85 = 方块宽度80 + 间距5
+          cols = Math.max(4, Math.min(8, cols)); // 限制列数在4-8之间
+        } else {
+          cols = level === 3 ? 
+            [5, 6, 7, 8, 9, 10, 10, 11, 11, 12, 12, 13][layerIndex] || 13 : 
+            [3, 4, 4, 5, 5, 5, 6][layerIndex] || 6;
+        }
         const rows = Math.ceil(layer.count / cols);
+        // 计算起始偏移，确保整体居中平铺
+        const gameAreaWidth = document.getElementById('gameArea').offsetWidth || 665;
+        const totalWidth = cols * 85 - 5; // 85 = 方块宽度80 + 间距5，最后一个方块无右侧间距
+        const startX = (gameAreaWidth - totalWidth) / 2; // 水平居中偏移
+        
         for (let i = 0; i < layer.count && index < allItems.length; i++) {
           const col = i % cols;
           const row = Math.floor(i / cols);
-          const xOffset = level === 3 ? 40 : 70;
-          const xStep = level === 3 ? 65 : 80;
-          const yOffset = level === 3 ? 20 : 30;
-          const yStep = level === 3 ? 55 : 65;
-          const randomRange = level === 3 ? 8 : 12;
+          // 固定间距，确保平铺整齐
+          const xStep = 85; // 方块间距5px
+          const yStep = 70; // 行间距10px
           
-          const x = xOffset + col * xStep + Math.random() * randomRange - (randomRange/2);
-          const y = yOffset + row * yStep + layer.offset;
+          const x = startX + col * xStep;
+          const y = 30 + row * yStep + layer.offset;
           blocks.push({
             id: index,
             imageUrl: allItems[index],
@@ -699,28 +664,26 @@
           index++;
         }
       });
-
+      // 重新计算覆盖关系（第三关保持合理覆盖密度）
       blocks.forEach(b1 => {
         blocks.forEach(b2 => {
           if (b2.layer > b1.layer) {
             const dx = Math.abs(b1.x - b2.x);
             const dy = Math.abs(b1.y - b2.y);
-            const thresholdX = level === 3 ? 70 : 85;
-            const thresholdY = level === 3 ? 65 : 75;
+            const thresholdX = currentLevel === 3 ? 75 : 85;
+            const thresholdY = currentLevel === 3 ? 65 : 75;
             if (dx < thresholdX && dy < thresholdY) {
               b1.coveredBy.push(b2.id);
             }
           }
         });
       });
-
       renderBlocks();
       document.getElementById('remaining').textContent = totalBlocks;
       document.getElementById('undoCount').textContent = undoCount;
       document.getElementById('freeUndoHint').textContent = '免费';
       updateGodEliminateBtn();
     }
-
     // 修复核心：无敌模式强制可点击
     function isClickable(block) {
       if (block.removed) return false;
@@ -730,7 +693,6 @@
         return b && b.removed;
       });
     }
-
     function toggleGodEliminateMode() {
       if (!godMode) {
         alert('请先开启大佬模式！（按6键6次）');
@@ -744,13 +706,11 @@
         '🔸 无敌消除模式已关闭';
       renderBlocks();
     }
-
     function updateGodEliminateBtn() {
       const btn = document.getElementById('godEliminateBtn');
       btn.style.display = godMode ? 'inline-block' : 'none';
       btn.textContent = godEliminateMode ? '✨ 关闭无敌消除' : '✨ 无敌消除模式';
     }
-
     function godEliminateBlocks(imageUrl) {
       if (!godMode || !godEliminateMode) return;
       const targetBlocks = blocks.filter(b => !b.removed && b.imageUrl === imageUrl);
@@ -792,19 +752,14 @@
         setTimeout(() => showLeaderboard(score, undoCount), 1000);
       }
     }
-
     function renderBlocks() {
       const gameArea = document.getElementById('gameArea');
       gameArea.innerHTML = '';
-
       const isFailed = tray.length > traySize;
-
       blocks.forEach(block => {
         if (block.removed) return;
-
         const div = document.createElement('div');
         div.className = 'block';
-
         // 无敌消除模式优先绑定点击事件
         if (godMode && godEliminateMode) {
           div.classList.add('god-mode-hover');
@@ -822,11 +777,9 @@
           div.style.opacity = '0.4';
           div.style.cursor = 'default';
         }
-
         if (godMode && block.coveredBy.length > 0 && !isFailed && !godEliminateMode) {
           div.classList.add('is-covered-hint');
         }
-
         const img = document.createElement('img');
         img.src = block.imageUrl;
         img.alt = "tile";
@@ -837,7 +790,6 @@
       });
       renderTray();
     }
-
     function renderTray() {
       const slots = document.querySelectorAll('.tray-slot');
       slots.forEach((slot, i) => {
@@ -851,32 +803,25 @@
         }
       });
     }
-
     function clickBlock(id) {
       const block = blocks.find(b => b.id === id);
       if (!block || block.removed) return;
-
       if (godMode && godEliminateMode) {
         godEliminateBlocks(block.imageUrl);
         renderBlocks();
         return;
       }
-
       if (tray.length >= traySize) {
         document.getElementById('fullTrayModal').classList.add('active');
         return;
       }
-
       if (!isClickable(block)) return;
-
       history.push({ tray: [...tray], removed: block.id });
-
       block.removed = true;
       tray.push(block.imageUrl);
       checkEliminate();
       totalBlocks--;
       document.getElementById('remaining').textContent = totalBlocks;
-
       if (tray.length > traySize) {
         document.getElementById('failModal').classList.add('active');
         saveRecord();
@@ -893,10 +838,8 @@
           setTimeout(() => showLeaderboard(score, undoCount), 1000);
         }
       }
-
       renderBlocks();
     }
-
     function checkEliminate() {
       if (tray.length < 3) return;
       const last = tray[tray.length - 1];
@@ -923,7 +866,6 @@
               }
             }
           }
-
           tray = tray.filter(item => item !== last);
           const scoreAdd = currentLevel === 3 ? 50 : 30;
           score += scoreAdd;
@@ -932,11 +874,9 @@
         }
       }
     }
-
     function updateUI() {
       document.getElementById('score').textContent = score;
     }
-
     function addDifficultyLayers() {
       if (currentLevel === 2) {
         const extraLayers = 3;
@@ -986,10 +926,18 @@
         let newBlocks = [];
         const selectedImages = [...thirdLevelImageUrls];
         let baseOffset = Math.max(...blocks.map(b => b.layer)) + 25;
+        // 新增方块保持平铺布局
+        const gameAreaWidth = document.getElementById('gameArea').offsetWidth || 665;
+        const cols = Math.floor((gameAreaWidth - 80) / 85);
+        const totalWidth = cols * 85 - 5;
+        const startX = (gameAreaWidth - totalWidth) / 2;
+        
         for (let l = 0; l < extraLayers; l++) {
           for (let i = 0; i < extraBlocksPerLayer; i++) {
-            const x = 40 + (i % 8) * 65 + Math.random() * 8 - 4;
-            const y = 20 + Math.floor(i / 8) * 55 + baseOffset + l * 20;
+            const col = i % cols;
+            const row = Math.floor(i / cols);
+            const x = startX + col * 85;
+            const y = 30 + row * 70 + baseOffset + l * 20;
             const img = selectedImages[Math.floor(Math.random() * selectedImages.length)];
             const newId = blocks.length + newBlocks.length;
             newBlocks.push({
@@ -1024,7 +972,6 @@
         }, 3000);
       }
     }
-
     function requestUndo() {
       if (history.length === 0) {
         alert('没有可撤回的操作！');
@@ -1054,7 +1001,6 @@
         document.getElementById('undoModal').classList.add('active');
       }
     }
-
     function confirmUndo() {
       const input = document.getElementById('undoInput').value.trim();
       const errorMsg = document.getElementById('undoError');
@@ -1066,10 +1012,8 @@
         setTimeout(() => errorMsg.textContent = '', 2000);
       }
     }
-
     function performUndo() {
       if (history.length === 0) return;
-
       const last = history.pop();
       if (last.isGodEliminate) {
         last.removed.forEach(id => {
@@ -1089,27 +1033,21 @@
         score -= scoreSub;
         if (score < 0) score = 0;
       }
-
       undoCount++;
       updateUI();
       document.getElementById('undoCount').textContent = undoCount;
-
       if (currentLevel === 2 && undoCount % 2 === 0) {
         setTimeout(addDifficultyLayers, 500);
       } else if (currentLevel === 3 && undoCount % 1 === 0) {
         setTimeout(addDifficultyLayers, 300);
       }
-
       document.getElementById('remaining').textContent = totalBlocks;
-
       if (tray.length <= traySize) {
         document.getElementById('failModal').classList.remove('active');
         document.getElementById('message').textContent = '';
       }
-
       renderBlocks();
     }
-
     function tryNextLevel() {
       const input = document.getElementById('passInput').value.trim();
       const errorMsg = document.getElementById('errorMsg');
@@ -1121,7 +1059,6 @@
         setTimeout(() => errorMsg.textContent = '', 2000);
       }
     }
-
     function tryThirdLevel() {
       const input = document.getElementById('secondPassInput').value.trim();
       const errorMsg = document.getElementById('secondErrorMsg');
@@ -1133,7 +1070,6 @@
         setTimeout(() => errorMsg.textContent = '', 2000);
       }
     }
-
     // 大佬模式：按 6 键 6 次
     let sixCount = 0;
     let lastSixTime = 0;
@@ -1160,7 +1096,6 @@
         }
       }
     });
-
     // 初始化游戏
     newGame(1);
   </script>
